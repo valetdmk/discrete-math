@@ -1,0 +1,458 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BFS - Демонстрация задач</title>
+    <style>
+        body {
+            font-family: 'Courier New', monospace;
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 20px;
+            background: #f5f5f5;
+        }
+        .task {
+            background: white;
+            margin: 20px 0;
+            padding: 20px;
+            border-left: 4px solid #007bff;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .task h2 {
+            margin: 0 0 15px 0;
+            font-size: 1.2em;
+            color: #007bff;
+        }
+        button {
+            background: #007bff;
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            cursor: pointer;
+            font-family: monospace;
+            font-size: 14px;
+            margin: 10px 0;
+        }
+        button:hover {
+            background: #0056b3;
+        }
+        input, select {
+            padding: 6px;
+            font-family: monospace;
+            font-size: 14px;
+            margin-right: 10px;
+        }
+        .result {
+            background: #f0f0f0;
+            padding: 12px;
+            margin-top: 10px;
+            font-family: monospace;
+            white-space: pre-wrap;
+        }
+        .maze {
+            font-family: monospace;
+            margin: 10px 0;
+        }
+        .maze-row {
+            display: flex;
+        }
+        .maze-cell {
+            width: 35px;
+            height: 35px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border: 1px solid #ccc;
+            font-size: 14px;
+        }
+        .wall { background: #333; color: white; }
+        .path { background: #28a745; color: white; }
+        .start { background: #007bff; color: white; }
+        .end { background: #dc3545; color: white; }
+        .fresh { background: #ffc107; }
+        .rotten { background: #dc3545; color: white; }
+        .empty { background: #ecf0f1; }
+        table {
+            border-collapse: collapse;
+            margin: 10px 0;
+        }
+        td {
+            width: 35px;
+            height: 35px;
+            text-align: center;
+            border: 1px solid #999;
+        }
+    </style>
+</head>
+<body>
+    <h1>Поиск в ширину (BFS)</h1>
+
+    <!-- ЗАДАЧА 1 -->
+    <div class="task">
+        <h2>1. Кратчайший путь в лабиринте</h2>
+        <div id="maze1"></div>
+        <button onclick="task1()">Найти кратчайший путь</button>
+        <div id="result1" class="result"></div>
+    </div>
+
+    <!-- ЗАДАЧА 2 -->
+    <div class="task">
+        <h2>2. Минимальные ходы коня</h2>
+        <div>Старт: <input type="number" id="kx1" value="0" min="0" max="7" style="width:50px"> 
+             <input type="number" id="ky1" value="0" min="0" max="7" style="width:50px"></div>
+        <div>Финиш: <input type="number" id="kx2" value="7" min="0" max="7" style="width:50px"> 
+             <input type="number" id="ky2" value="7" min="0" max="7" style="width:50px"></div>
+        <button onclick="task2()">Найти минимальные ходы</button>
+        <div id="result2" class="result"></div>
+    </div>
+
+    <!-- ЗАДАЧА 3 -->
+    <div class="task">
+        <h2>3. Гнилые апельсины</h2>
+        <div id="orangesDisplay"></div>
+        <button onclick="task3()">Запустить заражение</button>
+        <div id="result3" class="result"></div>
+    </div>
+
+    <!-- ЗАДАЧА 4 -->
+    <div class="task">
+        <h2>4. Преобразование строки (Word Ladder)</h2>
+        <div>Старт: <input type="text" id="startWord" value="hit" style="width:80px"></div>
+        <div>Финиш: <input type="text" id="endWord" value="cog" style="width:80px"></div>
+        <div>Слова: <input type="text" id="wordList" value="hot,dot,dog,lot,log,cog" style="width:300px"></div>
+        <button onclick="task4()">▶ Найти кратчайшее преобразование</button>
+        <div id="result4" class="result"></div>
+    </div>
+
+    <!-- ЗАДАЧА 5 -->
+    <div class="task">
+        <h2>5. Ближайший выход из лабиринта</h2>
+        <div id="maze5"></div>
+        <div>Старт: (row <input type="number" id="startRow5" value="1" min="0" max="3">, 
+                col <input type="number" id="startCol5" value="1" min="0" max="3">)</div>
+        <button onclick="task5()">Найти ближайший выход</button>
+        <div id="result5" class="result"></div>
+    </div>
+
+    <!-- ЗАДАЧА 6 -->
+    <div class="task">
+        <h2>6. Поиск слова в сетке</h2>
+        <div id="grid"></div>
+        <div>Слово: <input type="text" id="searchWord" value="ABCCED" style="width:150px"></div>
+        <button onclick="task6()">Найти слово</button>
+        <div id="result6" class="result"></div>
+    </div>
+
+    <script>
+        //ЗАДАЧА 1: Кратчайший путь в лабиринте
+        const maze1 = [
+            [0, 1, 0, 0],
+            [0, 1, 0, 1],
+            [0, 0, 0, 0],
+            [0, 1, 1, 0]
+        ];
+        
+        function drawMaze1() {
+            let html = '<div class="maze">';
+            for (let i = 0; i < maze1.length; i++) {
+                html += '<div class="maze-row">';
+                for (let j = 0; j < maze1[0].length; j++) {
+                    let cls = 'maze-cell';
+                    let content = maze1[i][j] === 1 ? '█' : '·';
+                    if (i === 0 && j === 0) { cls += ' start'; content = '🚀'; }
+                    if (i === 3 && j === 3) { cls += ' end'; content = '🏁'; }
+                    if (maze1[i][j] === 1) cls += ' wall';
+                    html += `<div class="${cls}">${content}</div>`;
+                }
+                html += '</div>';
+            }
+            html += '</div>';
+            document.getElementById('maze1').innerHTML = html;
+        }
+
+        function shortestPath(maze, start, end) {
+            const rows = maze.length, cols = maze[0].length;
+            const queue = [[start[0], start[1], 0]];
+            const visited = Array(rows).fill().map(() => Array(cols).fill(false));
+            visited[start[0]][start[1]] = true;
+            
+            const dirs = [[1,0], [-1,0], [0,1], [0,-1]];
+            
+            while (queue.length > 0) {
+                const [row, col, dist] = queue.shift();
+                if (row === end[0] && col === end[1]) return dist;
+                
+                for (const [dr, dc] of dirs) {
+                    const nr = row + dr, nc = col + dc;
+                    if (nr >= 0 && nr < rows && nc >= 0 && nc < cols && 
+                        maze[nr][nc] === 0 && !visited[nr][nc]) {
+                        visited[nr][nc] = true;
+                        queue.push([nr, nc, dist + 1]);
+                    }
+                }
+            }
+            return -1;
+        }
+
+        function task1() {
+            const dist = shortestPath(maze1, [0, 0], [3, 3]);
+            document.getElementById('result1').innerHTML = dist === -1 
+                ? 'Путь не найден' 
+                : `Кратчайший путь: ${dist} шагов`;
+        }
+
+        //ЗАДАЧА 2: Ходы коня 
+        function knightMoves(x1, y1, x2, y2) {
+            const moves = [[-2,-1], [-2,1], [-1,-2], [-1,2], [1,-2], [1,2], [2,-1], [2,1]];
+            const queue = [[x1, y1, 0]];
+            const visited = Array(8).fill().map(() => Array(8).fill(false));
+            visited[x1][y1] = true;
+            
+            while (queue.length > 0) {
+                const [x, y, dist] = queue.shift();
+                if (x === x2 && y === y2) return dist;
+                
+                for (const [dx, dy] of moves) {
+                    const nx = x + dx, ny = y + dy;
+                    if (nx >= 0 && nx < 8 && ny >= 0 && ny < 8 && !visited[nx][ny]) {
+                        visited[nx][ny] = true;
+                        queue.push([nx, ny, dist + 1]);
+                    }
+                }
+            }
+            return -1;
+        }
+
+        function task2() {
+            const x1 = parseInt(document.getElementById('kx1').value);
+            const y1 = parseInt(document.getElementById('ky1').value);
+            const x2 = parseInt(document.getElementById('kx2').value);
+            const y2 = parseInt(document.getElementById('ky2').value);
+            const moves = knightMoves(x1, y1, x2, y2);
+            document.getElementById('result2').innerHTML = `Минимальное количество ходов: ${moves}`;
+        }
+
+        //ЗАДАЧА 3: Гнилые апельсины 
+        const oranges = [
+            [2, 1, 1],
+            [1, 1, 0],
+            [0, 1, 1]
+        ];
+        
+        function drawOranges(state) {
+            let html = '<table>';
+            for (let i = 0; i < state.length; i++) {
+                html += '<tr>';
+                for (let j = 0; j < state[0].length; j++) {
+                    let content = '';
+                    if (state[i][j] === 0) { content = '⬜'; }
+                    else if (state[i][j] === 1) { content = '🍊'; }
+                    else if (state[i][j] === 2) { content = '💀'; }
+                    html += `<td style="font-size:20px">${content}</td>`;
+                }
+                html += '</tr>';
+            }
+            html += '</table>';
+            document.getElementById('orangesDisplay').innerHTML = html;
+        }
+
+        function rottenOranges(grid) {
+            const rows = grid.length, cols = grid[0].length;
+            const queue = [];
+            let fresh = 0;
+            
+            for (let i = 0; i < rows; i++) {
+                for (let j = 0; j < cols; j++) {
+                    if (grid[i][j] === 2) queue.push([i, j, 0]);
+                    if (grid[i][j] === 1) fresh++;
+                }
+            }
+            
+            const dirs = [[1,0], [-1,0], [0,1], [0,-1]];
+            let time = 0;
+            
+            while (queue.length > 0) {
+                const [row, col, t] = queue.shift();
+                time = t;
+                
+                for (const [dr, dc] of dirs) {
+                    const nr = row + dr, nc = col + dc;
+                    if (nr >= 0 && nr < rows && nc >= 0 && nc < cols && grid[nr][nc] === 1) {
+                        grid[nr][nc] = 2;
+                        fresh--;
+                        queue.push([nr, nc, t + 1]);
+                    }
+                }
+            }
+            
+            return fresh === 0 ? time : -1;
+        }
+
+        function task3() {
+            const copy = oranges.map(row => [...row]);
+            const time = rottenOranges(copy);
+            drawOranges(copy);
+            document.getElementById('result3').innerHTML = time === -1 
+                ? 'Не все апельсины могут сгнить' 
+                : `Время заражения: ${time} минут`;
+        }
+
+        //ЗАДАЧА 4: Преобразование строки
+        function wordLadder(start, end, wordSet) {
+            if (!wordSet.has(end)) return 0;
+            
+            const queue = [[start, 1]];
+            const visited = new Set();
+            visited.add(start);
+            
+            while (queue.length > 0) {
+                const [word, steps] = queue.shift();
+                if (word === end) return steps;
+                
+                for (let i = 0; i < word.length; i++) {
+                    for (let code = 97; code <= 122; code++) {
+                        const newWord = word.slice(0, i) + String.fromCharCode(code) + word.slice(i + 1);
+                        if (wordSet.has(newWord) && !visited.has(newWord)) {
+                            visited.add(newWord);
+                            queue.push([newWord, steps + 1]);
+                        }
+                    }
+                }
+            }
+            return 0;
+        }
+
+        function task4() {
+            const start = document.getElementById('startWord').value;
+            const end = document.getElementById('endWord').value;
+            const words = document.getElementById('wordList').value.split(',');
+            const wordSet = new Set(words.map(w => w.trim()));
+            const steps = wordLadder(start, end, wordSet);
+            document.getElementById('result4').innerHTML = steps 
+                ? `Минимальное количество шагов: ${steps}` 
+                : `Путь не найден`;
+        }
+
+        //ЗАДАЧА 5: Ближайший выход
+        const maze5 = [
+            [0, 0, 1, 1],
+            [1, 0, 0, 1],
+            [1, 1, 0, 1],
+            [0, 0, 0, 0]
+        ];
+        
+        function drawMaze5() {
+            let html = '<div class="maze">';
+            for (let i = 0; i < maze5.length; i++) {
+                html += '<div class="maze-row">';
+                for (let j = 0; j < maze5[0].length; j++) {
+                    let cls = 'maze-cell';
+                    let content = maze5[i][j] === 1 ? '█' : '·';
+                    if (maze5[i][j] === 1) cls += ' wall';
+                    html += `<div class="${cls}">${content}</div>`;
+                }
+                html += '</div>';
+            }
+            html += '</div>';
+            document.getElementById('maze5').innerHTML = html;
+        }
+
+        function nearestExit(maze, start) {
+            const rows = maze.length, cols = maze[0].length;
+            const queue = [[start[0], start[1], 0]];
+            const visited = Array(rows).fill().map(() => Array(cols).fill(false));
+            visited[start[0]][start[1]] = true;
+            
+            const dirs = [[1,0], [-1,0], [0,1], [0,-1]];
+            
+            while (queue.length > 0) {
+                const [row, col, dist] = queue.shift();
+                if ((row === 0 || row === rows-1 || col === 0 || col === cols-1) && dist > 0) {
+                    return dist;
+                }
+                
+                for (const [dr, dc] of dirs) {
+                    const nr = row + dr, nc = col + dc;
+                    if (nr >= 0 && nr < rows && nc >= 0 && nc < cols && 
+                        maze[nr][nc] === 0 && !visited[nr][nc]) {
+                        visited[nr][nc] = true;
+                        queue.push([nr, nc, dist + 1]);
+                    }
+                }
+            }
+            return -1;
+        }
+
+        function task5() {
+            const startRow = parseInt(document.getElementById('startRow5').value);
+            const startCol = parseInt(document.getElementById('startCol5').value);
+            const dist = nearestExit(maze5, [startRow, startCol]);
+            document.getElementById('result5').innerHTML = dist === -1 
+                ? 'Выход не найден' 
+                : `Ближайший выход: ${dist} шагов`;
+        }
+
+        // ЗАДАЧА 6: Поиск слова 
+        const grid = [
+            ['A','B','C','E'],
+            ['S','F','C','S'],
+            ['A','D','E','E']
+        ];
+        
+        function drawGrid() {
+            let html = '<table>';
+            for (let i = 0; i < grid.length; i++) {
+                html += '<tr>';
+                for (let j = 0; j < grid[0].length; j++) {
+                    html += `<td style="font-weight:bold">${grid[i][j]}</td>`;
+                }
+                html += '</tr>';
+            }
+            html += '<table>';
+            document.getElementById('grid').innerHTML = html;
+        }
+
+        function existWord(board, word) {
+            const rows = board.length, cols = board[0].length;
+            
+            function dfs(row, col, index) {
+                if (index === word.length) return true;
+                if (row < 0 || row >= rows || col < 0 || col >= cols || 
+                    board[row][col] !== word[index]) return false;
+                
+                const temp = board[row][col];
+                board[row][col] = '#';
+                
+                const found = dfs(row+1, col, index+1) || dfs(row-1, col, index+1) ||
+                             dfs(row, col+1, index+1) || dfs(row, col-1, index+1);
+                
+                board[row][col] = temp;
+                return found;
+            }
+            
+            for (let i = 0; i < rows; i++) {
+                for (let j = 0; j < cols; j++) {
+                    if (dfs(i, j, 0)) return true;
+                }
+            }
+            return false;
+        }
+
+        function task6() {
+            const word = document.getElementById('searchWord').value;
+            const boardCopy = grid.map(row => [...row]);
+            const found = existWord(boardCopy, word);
+            document.getElementById('result6').innerHTML = found 
+                ? `Слово "${word}" НАЙДЕНО в сетке!` 
+                : ` Слово "${word}" НЕ НАЙДЕНО в сетке`;
+        }
+
+        // инициализаця
+        drawMaze1();
+        drawOranges(oranges);
+        drawMaze5();
+        drawGrid();
+    </script>
+</body>
+</html>

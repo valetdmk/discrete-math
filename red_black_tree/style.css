@@ -1,0 +1,196 @@
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --bg: #f9f9f8;
+    --bg2: #ffffff;
+    --text: #1a1a1a;
+    --text2: #6b6b6b;
+    --border: rgba(0,0,0,0.12);
+    --border2: rgba(0,0,0,0.22);
+    --radius: 8px;
+    --radius-lg: 12px;
+    --red-node: #dc2626;
+    --black-node: #1e1e1e;
+    --highlight: #f59e0b;
+    --font: "Segoe UI", system-ui, -apple-system, sans-serif;
+    --mono: "Cascadia Code", "Fira Code", "Courier New", monospace;
+  }
+
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --bg: #1c1c1e;
+      --bg2: #2c2c2e;
+      --text: #f0f0ec;
+      --text2: #a0a09a;
+      --border: rgba(255,255,255,0.1);
+      --border2: rgba(255,255,255,0.2);
+      --black-node: #3a3a3c;
+    }
+  }
+
+  body {
+    font-family: var(--font);
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+  }
+
+  header {
+    background: var(--bg2);
+    border-bottom: 0.5px solid var(--border);
+    padding: 14px 20px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+  header h1 {
+    font-size: 16px;
+    font-weight: 500;
+    color: var(--text);
+  }
+  header span {
+    font-size: 12px;
+    color: var(--text2);
+    margin-left: auto;
+  }
+
+  .toolbar {
+    background: var(--bg2);
+    border-bottom: 0.5px solid var(--border);
+    padding: 10px 20px;
+    display: flex;
+    gap: 8px;
+    align-items: center;
+    flex-wrap: wrap;
+  }
+
+  input[type="number"] {
+    height: 36px;
+    width: 160px;
+    padding: 0 12px;
+    border: 0.5px solid var(--border2);
+    border-radius: var(--radius);
+    font-size: 14px;
+    font-family: var(--font);
+    background: var(--bg);
+    color: var(--text);
+    outline: none;
+    transition: border-color .15s;
+  }
+  input[type="number"]:focus { border-color: #2563eb; }
+
+  button {
+    height: 36px;
+    padding: 0 16px;
+    border: 0.5px solid var(--border2);
+    border-radius: var(--radius);
+    background: var(--bg2);
+    color: var(--text);
+    cursor: pointer;
+    font-size: 13px;
+    font-weight: 500;
+    font-family: var(--font);
+    transition: background .15s, opacity .15s;
+  }
+  button:hover { background: var(--bg); }
+  button.primary {
+    background: var(--text);
+    color: var(--bg2);
+    border-color: transparent;
+  }
+  button.primary:hover { opacity: .82; }
+  button.danger { color: #dc2626; border-color: rgba(220,38,38,.3); }
+  button.danger:hover { background: rgba(220,38,38,.07); }
+
+  .legend {
+    margin-left: auto;
+    display: flex;
+    gap: 14px;
+    align-items: center;
+    font-size: 12px;
+    color: var(--text2);
+  }
+  .legend-item { display: flex; align-items: center; gap: 5px; }
+  .dot {
+    width: 12px; height: 12px;
+    border-radius: 50%;
+    display: inline-block;
+    flex-shrink: 0;
+  }
+
+  .canvas-wrap {
+    flex: 1;
+    overflow: auto;
+    background: var(--bg);
+    position: relative;
+    min-height: 340px;
+  }
+
+  #empty-state {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    height: 340px;
+    gap: 10px;
+    color: var(--text2);
+    font-size: 14px;
+  }
+  .empty-icon { font-size: 42px; opacity: .4; }
+
+  svg#tree-svg {
+    display: block;
+    min-width: 100%;
+  }
+
+  .log-panel {
+    border-top: 0.5px solid var(--border);
+    max-height: 180px;
+    overflow-y: auto;
+    background: var(--bg2);
+  }
+  .log-title {
+    font-size: 11px;
+    font-weight: 500;
+    color: var(--text2);
+    padding: 8px 20px 4px;
+    position: sticky;
+    top: 0;
+    background: var(--bg2);
+    border-bottom: 0.5px solid var(--border);
+    text-transform: uppercase;
+    letter-spacing: .05em;
+  }
+  .log-entry {
+    padding: 5px 20px;
+    font-size: 12px;
+    font-family: var(--mono);
+    border-bottom: 0.5px solid var(--border);
+    display: flex;
+    gap: 10px;
+    align-items: baseline;
+  }
+  .log-entry:last-child { border-bottom: none; }
+  .log-op {
+    font-weight: 600;
+    min-width: 90px;
+    font-size: 11px;
+  }
+  .log-op.insert { color: #16a34a; }
+  .log-op.rotate  { color: #2563eb; }
+  .log-op.recolor { color: #d97706; }
+  .log-op.export  { color: #7c3aed; }
+  .log-nodes { color: var(--text); word-break: break-all; line-height: 1.6; }
+
+  footer {
+    background: var(--bg2);
+    border-top: 0.5px solid var(--border);
+    padding: 8px 20px;
+    font-size: 11px;
+    color: var(--text2);
+    display: flex;
+    gap: 16px;
+  }
+  #stats span { margin-right: 14px; }
