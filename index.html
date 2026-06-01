@@ -5,54 +5,106 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>BFS - Демонстрация задач</title>
     <style>
+        :root {
+            --bg: #f4efe7;
+            --surface: rgba(255, 252, 247, 0.92);
+            --surface-strong: #fffdf9;
+            --text: #2f241f;
+            --accent: #c96c3a;
+            --accent-dark: #9e4f25;
+            --border: rgba(116, 82, 65, 0.16);
+            --shadow: 0 18px 40px rgba(78, 48, 31, 0.12);
+        }
         body {
-            font-family: 'Courier New', monospace;
-            max-width: 900px;
+            font-family: 'Trebuchet MS', 'Segoe UI', sans-serif;
+            max-width: 1080px;
             margin: 0 auto;
-            padding: 20px;
-            background: #f5f5f5;
+            padding: 32px 20px 56px;
+            color: var(--text);
+            line-height: 1.5;
+            background:
+                radial-gradient(circle at top left, rgba(230, 180, 140, 0.35), transparent 32%),
+                radial-gradient(circle at top right, rgba(222, 140, 101, 0.18), transparent 28%),
+                linear-gradient(180deg, #fbf6ef 0%, var(--bg) 100%);
+        }
+        h1 {
+            margin: 0 0 24px;
+            font-size: clamp(2rem, 4vw, 3.2rem);
+            letter-spacing: 0.03em;
+            text-align: center;
+            color: #5a2d1b;
+            text-shadow: 0 1px 0 rgba(255,255,255,0.65);
         }
         .task {
-            background: white;
-            margin: 20px 0;
-            padding: 20px;
-            border-left: 4px solid #007bff;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            background: var(--surface);
+            margin: 22px 0;
+            padding: 24px;
+            border: 1px solid var(--border);
+            border-left: 8px solid var(--accent);
+            border-radius: 22px;
+            box-shadow: var(--shadow);
+            backdrop-filter: blur(10px);
         }
         .task h2 {
-            margin: 0 0 15px 0;
-            font-size: 1.2em;
-            color: #007bff;
+            margin: 0 0 16px 0;
+            font-size: 1.3em;
+            color: #7d3c1f;
         }
         button {
-            background: #007bff;
+            background: linear-gradient(135deg, var(--accent) 0%, #d88951 100%);
             color: white;
             border: none;
-            padding: 8px 16px;
+            padding: 10px 18px;
             cursor: pointer;
-            font-family: monospace;
+            font-family: inherit;
             font-size: 14px;
+            font-weight: 700;
+            letter-spacing: 0.02em;
             margin: 10px 0;
+            border-radius: 999px;
+            box-shadow: 0 12px 24px rgba(201, 108, 58, 0.24);
+            transition: transform 0.18s ease, box-shadow 0.18s ease, background 0.18s ease;
         }
         button:hover {
-            background: #0056b3;
+            background: linear-gradient(135deg, var(--accent-dark) 0%, #b36233 100%);
+            transform: translateY(-1px);
+            box-shadow: 0 16px 28px rgba(158, 79, 37, 0.28);
+        }
+        button:active {
+            transform: translateY(0);
         }
         input, select {
-            padding: 6px;
-            font-family: monospace;
+            padding: 8px 10px;
+            font-family: inherit;
             font-size: 14px;
-            margin-right: 10px;
+            margin: 6px 10px 6px 0;
+            border: 1px solid rgba(142, 101, 80, 0.28);
+            border-radius: 10px;
+            background: var(--surface-strong);
+            color: var(--text);
+            box-sizing: border-box;
+        }
+        input:focus, select:focus {
+            outline: 2px solid rgba(201, 108, 58, 0.22);
+            border-color: var(--accent);
         }
         .result {
-            background: #f0f0f0;
-            padding: 12px;
-            margin-top: 10px;
-            font-family: monospace;
+            background: linear-gradient(180deg, rgba(255,255,255,0.88) 0%, rgba(248, 237, 227, 0.95) 100%);
+            padding: 14px 16px;
+            margin-top: 14px;
+            font-family: 'Consolas', 'Courier New', monospace;
             white-space: pre-wrap;
+            border-radius: 14px;
+            border: 1px solid rgba(160, 116, 89, 0.18);
+            color: #4b332a;
         }
         .maze {
-            font-family: monospace;
-            margin: 10px 0;
+            font-family: 'Consolas', 'Courier New', monospace;
+            margin: 14px 0;
+            display: inline-block;
+            padding: 10px;
+            background: rgba(255,255,255,0.45);
+            border-radius: 16px;
         }
         .maze-row {
             display: flex;
@@ -63,25 +115,54 @@
             display: flex;
             align-items: center;
             justify-content: center;
-            border: 1px solid #ccc;
+            border: 1px solid rgba(116, 82, 65, 0.16);
             font-size: 14px;
+            border-radius: 10px;
+            margin: 2px;
+            background: #fff8f1;
+            box-shadow: inset 0 1px 0 rgba(255,255,255,0.6);
         }
-        .wall { background: #333; color: white; }
-        .path { background: #28a745; color: white; }
-        .start { background: #007bff; color: white; }
-        .end { background: #dc3545; color: white; }
-        .fresh { background: #ffc107; }
-        .rotten { background: #dc3545; color: white; }
-        .empty { background: #ecf0f1; }
+        .wall { background: #5f4b42; color: white; }
+        .path { background: #5da271; color: white; }
+        .start { background: #4b8f8c; color: white; }
+        .end { background: #d15a45; color: white; }
+        .fresh { background: #f2b544; color: #4a331e; }
+        .rotten { background: #c95643; color: white; }
+        .empty { background: #efe3d6; }
         table {
-            border-collapse: collapse;
-            margin: 10px 0;
+            border-collapse: separate;
+            border-spacing: 4px;
+            margin: 12px 0;
+            background: rgba(255,255,255,0.42);
+            padding: 8px;
+            border-radius: 16px;
         }
         td {
             width: 35px;
             height: 35px;
             text-align: center;
-            border: 1px solid #999;
+            border: 1px solid rgba(116, 82, 65, 0.16);
+            border-radius: 10px;
+            background: #fff8f1;
+            box-shadow: inset 0 1px 0 rgba(255,255,255,0.65);
+        }
+        @media (max-width: 720px) {
+            body {
+                padding: 20px 14px 36px;
+            }
+            .task {
+                padding: 18px;
+                border-radius: 18px;
+            }
+            .maze-cell,
+            td {
+                width: 30px;
+                height: 30px;
+                font-size: 13px;
+            }
+            input[style*="width:300px"] {
+                max-width: 100%;
+            }
         }
     </style>
 </head>
